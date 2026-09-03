@@ -1,0 +1,16 @@
+{
+  "name": "Contact Sheet",
+  "tagline": "Thirty-six chances. No take-backs.",
+  "bg": "#14110F",
+  "fg": "#F2ECE1",
+  "accent": "#E08A3C",
+  "font": "/Users/sherry/Documents/DEVPROJECTS/contact-sheet/store/display.ttf",
+  "mark": [
+    { "t": "rect", "x": 20, "y": 22, "w": 20, "h": 30, "r": 2, "c": "fg" },
+    { "t": "rect", "x": 44, "y": 22, "w": 20, "h": 30, "r": 2, "c": "fg" },
+    { "t": "rect", "x": 68, "y": 22, "w": 20, "h": 30, "r": 2, "c": "fg" },
+    { "t": "rect", "x": 20, "y": 56, "w": 20, "h": 30, "r": 2, "c": "fg" },
+    { "t": "rect", "x": 44, "y": 56, "w": 20, "h": 30, "r": 2, "c": "fg" },
+    { "t": "rect", "x": 68, "y": 56, "w": 20, "h": 30, "r": 2, "c": "accent" }
+  ]
+}

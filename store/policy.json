@@ -1,0 +1,24 @@
+{
+  "app": "Contact Sheet",
+  "org": "SocialSure Private Limited",
+  "site": "https://shayanmohd.github.io/contact-sheet/",
+  "email": "shayanm2002@gmail.com",
+  "bg": "#14110F", "fg": "#F2ECE1", "muted": "#A79D8D", "hair": "#2E2A23", "accent": "#E08A3C",
+  "bgDark": "#14110F", "fgDark": "#F2ECE1", "mutedDark": "#A79D8D", "hairDark": "#2E2A23", "accentDark": "#E08A3C",
+  "fontFamily": "Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif",
+  "fontCss": "fonts/fonts.css",
+  "permissions": [
+    ["CAMERA", "to take the photograph. The camera is opened only while a roll is loaded and the camera screen is in front of you, and it is released the moment you leave that screen or the app goes to the background. The frame is written straight to this app's own storage"],
+    ["VIBRATE", "the shutter and the wind-on ratchet, felt through the phone. It can be switched off in Settings"],
+    ["POST_NOTIFICATIONS", "one notice per roll, on the morning that roll finishes developing. Nothing else is ever sent to your notification shade"]
+  ],
+  "network": false,
+  "collects": [],
+  "storage": "Your frames are written to this app's private storage on this device, as image files in its own database. They are not uploaded, not backed up to us, and not shared with anyone. Development also happens here: the response curve, grain, halation and quirks of a film stock are calculated on your phone, over your own frames. If you uninstall the app, the frames go with it, so the app lets you save any developed frame at full size, and any whole contact sheet, to your device at any time.",
+  "extra": [
+    ["Undeveloped frames", "Between the shutter and eight the next morning, a frame is held on the device and is not displayed anywhere in the app. That is a rule the app keeps, not a cryptographic guarantee: the file sits in the app's private storage like any other app data, and a person with physical access to an unlocked, rooted device could read it. What the app promises is that it will not show it to you, and it does not."],
+    ["Notifications", "The develop notice names the roll, the film stock and the number of exposures. It never contains an image."],
+    ["Saving and sharing", "Saving a frame or a sheet writes a file to your device's Downloads through Android's own media store. Sharing hands that file to the app you pick from the Android share sheet. From that point the file is governed by whatever you shared it with, not by us."],
+    ["Erasing", "Settings has an Erase everything control that deletes every roll, every frame and every setting from the device immediately. There is no copy anywhere else."]
+  ]
+}
