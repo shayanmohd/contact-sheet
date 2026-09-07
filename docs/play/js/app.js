@@ -121,7 +121,7 @@ const App = (() => {
     $('#cNum').classList.toggle('low', !!r && n <= 6 && n > 0);
     $('#cNum').classList.toggle('spent', full);
     $('#cNum').classList.toggle('none', !r);
-    $('#cCap').textContent = r ? (full ? 'roll finished' : n === 1 ? 'frame left' : 'frames left') : 'loaded';
+    $('#cCap').textContent = r ? (full ? 'roll finished' : n === 1 ? 'frame left' : 'frames left') : 'in the camera';
     $('#emptyCam').hidden = !!r;
     $('#fullCam').hidden = !full;
     $('#controls').hidden = !r || full;
@@ -735,9 +735,56 @@ const App = (() => {
     // Nothing back yet: a length of film going into the envelope it comes home in.
     $('#sheetsEmptyArt').innerHTML = emptyArt();
 
+    // The two states of an empty camera, both drawn as a 135 cassette in the same geometry:
+    // one with the leader out waiting to be threaded, one wound back in and done with.
+    $('#emptyCamArt').innerHTML = cassetteSvg(146, 'csa');
+    $('#fullCamArt').innerHTML = cassetteSvg(16, 'csb');
+
     // The lab spool, and the rewind spool, are the same drawn reel at two sizes.
     $('#labSpool').innerHTML = spoolSvg('lab');
     $('#spool').innerHTML = spoolSvg('rw');
+  }
+
+  /** A 135 cassette, with `lead` film units of leader hanging out of the light trap.
+      A long leader is a roll waiting to be threaded; a stub is one wound back in. The
+      leader is Mark's own perforation geometry, so it is the same film as everywhere else. */
+  function cassetteSvg(lead, id) {
+    const S = 0.62, FH = Mark.FILM_H;                       // film units to view units
+    const L = Math.max(10, lead);
+    const tongue = L > 60
+      ? `M0 0 H${(L - 34).toFixed(1)} L${L} 13.5 V${FH} H0 Z`
+      : `M0 0 H${L} V${FH} H0 Z`;
+    const perfs = Mark.perfPath(L, 1.4);
+    const x0 = 60, y0 = 58 - (FH * S) / 2;
+    return `<svg viewBox="0 0 176 116" aria-hidden="true">
+  <defs>
+    <linearGradient id="${id}shell" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#40382E"/><stop offset="0.55" stop-color="#241F1A"/><stop offset="1" stop-color="#141110"/>
+    </linearGradient>
+    <linearGradient id="${id}film" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A241E"/><stop offset="0.5" stop-color="#1D1915"/><stop offset="1" stop-color="#151210"/>
+    </linearGradient>
+    <clipPath id="${id}lead" clipPathUnits="userSpaceOnUse"><path d="${tongue}"/></clipPath>
+  </defs>
+  <g transform="translate(${x0} ${y0.toFixed(1)}) scale(${S})">
+    <path d="${tongue}" fill="url(#${id}film)"/>
+    <g clip-path="url(#${id}lead)">
+      <path d="${perfs}" fill="#0A0908"/>
+      <path d="${perfs}" fill="none" stroke="#3E362C" stroke-width="0.22"/>
+    </g>
+    <path d="${tongue}" fill="none" stroke="#4B4136" stroke-width="0.5"/>
+  </g>
+  <g>
+    <rect x="30" y="17" width="17" height="10" rx="2.4" fill="#3A322A" stroke="#544838" stroke-width="1"/>
+    <rect x="30" y="89" width="17" height="10" rx="2.4" fill="#3A322A" stroke="#544838" stroke-width="1"/>
+    <rect x="12" y="26" width="56" height="64" rx="8" fill="url(#${id}shell)" stroke="#5A4E3F" stroke-width="1.4"/>
+    <rect x="12" y="47" width="56" height="19" fill="var(--accent)" opacity="0.9"/>
+    <rect x="12" y="47" width="56" height="19" fill="none" stroke="#0F0D0B" stroke-width="0.8" opacity="0.5"/>
+    <path d="M20 56.5h22M20 61h13" stroke="#2A1B08" stroke-width="2.2" stroke-linecap="round" opacity="0.75"/>
+    <path d="M62 30v56" stroke="#0C0A09" stroke-width="3" opacity="0.55"/>
+    <path d="M17 31v54" stroke="#FFE3AC" stroke-width="1" opacity="0.14"/>
+  </g>
+</svg>`;
   }
 
   /** A reel of film. `--turn` on the element rotates the core. */

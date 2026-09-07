@@ -20,7 +20,7 @@ SHOOT BLIND
 The viewfinder carries a hint of the stock you loaded. After the shutter there is nothing: no thumbnail, no review, no way back. A counter goes down, and a wind-on ratchet takes 1.2 seconds before the next frame is ready, which changes how you shoot more than any setting could. Thirty-six, then the motor rewinds and the roll goes to the lab.
 
 TOMORROW AT EIGHT
-It comes back the next morning, developed. One batch a day. The counter shuts at eight in the evening, so a roll handed in after that misses the collection and comes back the morning after, exactly like the shop that closed. The app tells you the day and the hour as you hand the roll over. You can move the hour two either way in Settings, and that is the only thing about the wait you can change.
+It comes back the next morning, developed. One batch a day. The counter shuts at eight in the evening, so a roll handed in after that misses the collection and comes back the morning after next, exactly like the shop that closed. The app tells you the day and the hour as you hand the roll over. You can move the hour two either way in Settings, and that is the only thing about the wait you can change.
 
 INSTRUCTIONS FOR THE LAB
 Ask for a push or a pull as you hand the roll over: brighter and harder and grainier, or gentler with finer grain and highlights that hold on longer. You choose blind, before you have seen a single frame, which is the only way it was ever done.

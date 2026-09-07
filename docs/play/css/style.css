@@ -342,6 +342,13 @@ input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); }
   position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 2;
   padding: 0 30px; text-align: center;
 }
+/* the drawn part of an empty camera: a cassette in the same film geometry as the mark */
+.ec-art { width: min(74vw, 268px); margin: 0 auto 22px; }
+.ec-art svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .8)); }
+@media (prefers-reduced-motion: no-preference) {
+  .ec-art { animation: ec-in .5s var(--ease) both; }
+  @keyframes ec-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+}
 .ec-line { font-size: 23px; font-weight: 700; font-stretch: 100%; letter-spacing: -.02em;
            margin: 0 0 10px; text-wrap: balance; }
 .ec-sub { font-size: 14px; color: var(--fg3); margin: 0 auto; line-height: 1.55; max-width: 30ch; }
@@ -517,7 +524,7 @@ input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); }
 .box .b-iso { font-size: 30px; font-weight: 700; line-height: .84; letter-spacing: -.03em;
               position: relative; z-index: 2; font-stretch: 78%; }
 .box .b-foot { font-size: 6px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700;
-               position: relative; z-index: 2; opacity: .78; }
+               position: relative; z-index: 2; opacity: .9; }
 .box .b-band { position: absolute; z-index: 1; }
 .box[data-style=band] .b-band { left: 0; right: 0; top: 0; height: 34%; background: var(--band); }
 .box[data-style=band] .b-name { color: var(--paper); margin-top: -2%; }
@@ -542,11 +549,13 @@ input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); }
 .box3d .face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .box3d .back { position: absolute; inset: 0; transform: rotateY(180deg); }
 .box.rear { justify-content: flex-start; gap: 6px; padding: 9%; }
-.box.rear .r-h { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; opacity: .88; }
+.box.rear .r-h { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
 .box.rear .r-row { display: flex; justify-content: space-between; gap: 8px; font-size: 8.5px;
                    border-bottom: 1px solid rgba(0, 0, 0, .18); padding: 3px 0; line-height: 1.35; }
 .box.rear .r-row b { font-weight: 700; }
-.box.rear .r-row span { text-align: right; opacity: .82; }
+/* The data sheet is 8.5px print on a coloured box: it gets the ink at full strength,
+   and the label reads as the label because it is the bold one. */
+.box.rear .r-row span { text-align: right; }
 .flip-tip { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--fg3);
             text-align: center; margin: 0 0 24px; font-weight: 700; }
 .st-note { font-size: 15px; line-height: 1.6; color: var(--fg2); margin: 0; }

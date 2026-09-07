@@ -5,7 +5,7 @@ const Export = (() => {
   const PAPER = '#0D0C0B';     // a contact sheet is mostly black: clear film prints dark
   const EDGE = '#CFC6B6';      // edge printing reads light on the print
   const FAINT = '#7E7568';
-  const ACCENT = '#E08A3C';
+  const ACCENT = '#F2A62B';   // the app's one accent, so a print and a screen agree
 
   if (!CanvasRenderingContext2D.prototype.roundRect) {
     CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {

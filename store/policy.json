@@ -3,8 +3,8 @@
   "org": "SocialSure Private Limited",
   "site": "https://shayanmohd.github.io/contact-sheet/",
   "email": "shayanm2002@gmail.com",
-  "bg": "#14110F", "fg": "#F2ECE1", "muted": "#A79D8D", "hair": "#2E2A23", "accent": "#E08A3C",
-  "bgDark": "#14110F", "fgDark": "#F2ECE1", "mutedDark": "#A79D8D", "hairDark": "#2E2A23", "accentDark": "#E08A3C",
+  "bg": "#14110F", "fg": "#F2ECE1", "muted": "#A79D8D", "hair": "#2E2A23", "accent": "#F2A62B",
+  "bgDark": "#14110F", "fgDark": "#F2ECE1", "mutedDark": "#A79D8D", "hairDark": "#2E2A23", "accentDark": "#F2A62B",
   "fontFamily": "Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif",
   "fontCss": "fonts/fonts.css",
   "permissions": [

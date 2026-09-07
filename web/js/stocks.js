@@ -22,7 +22,7 @@ const Stocks = (() => {
     { id: 'cornerstore400', name: 'Corner Store 400', iso: 400,
       line: 'Warm, cheap, unreliable.',
       note: 'The film from the rack by the till. Warm, forgiving, a little soft in the corners, and every so often a frame comes back a stop dark for no reason anybody has explained. Frames one and thirty-six catch light from the cassette mouth.',
-      box: { paper: '#D8402C', ink: '#FFF3D6', band: '#F2B430', style: 'split' },
+      box: { paper: '#C93724', ink: '#FFF3D6', band: '#F2B430', style: 'split' },
       hint: 'sepia(0.16) saturate(1.06) contrast(0.97) brightness(1.02)',
       curve: { r: { gain: 1.08, gamma: 0.92, knee: 0.68, roll: 2.0, lift: 0.035 },
                g: { gain: 1.00, gamma: 0.97, knee: 0.70, roll: 1.9, lift: 0.030 },
