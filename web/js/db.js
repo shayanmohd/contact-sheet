@@ -43,11 +43,21 @@ const DB = (() => {
     return ks.length;
   }
 
-  /** Rough on-device footprint, in bytes. Reads sizes only, never decodes. */
-  async function usage() {
-    const s = await tx('readonly');
-    const all = await wrap(s.getAll());
-    return all.reduce((n, b) => n + (b && b.size ? b.size : 0), 0);
+  /** Rough on-device footprint, in bytes. Walks a cursor and reads sizes, so a device
+      holding several developed rolls is never asked to hold them all in memory at once. */
+  function usage() {
+    return tx('readonly').then(s => new Promise((res, rej) => {
+      let total = 0;
+      const req = s.openCursor();
+      req.onsuccess = () => {
+        const c = req.result;
+        if (!c) return res(total);
+        const v = c.value;
+        if (v && v.size) total += v.size;
+        c.continue();
+      };
+      req.onerror = () => rej(req.error);
+    }));
   }
 
   async function clear() { const s = await tx('readwrite'); return wrap(s.clear()); }

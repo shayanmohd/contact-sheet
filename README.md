@@ -15,6 +15,7 @@ no network calls. The font is self-hosted.
 
 | file | what it holds |
 | --- | --- |
+| `js/mark.js` | the film edge in real 135 geometry, and the inline SVG icon set the app draws with |
 | `js/stocks.js` | the six film stocks as numbers: per channel response curves, grain, halation, quirks |
 | `js/film.js` | development. Curve lookup, synthesised grain, halation bloom, falloff, light leaks |
 | `js/camera.js` | getUserMedia, the 2:3 crop of a 135 frame, torch, capture |
@@ -35,9 +36,14 @@ The web core is copied into the app's assets by the `syncWebAssets` Gradle task 
 
 `docs/` is the GitHub Pages site: landing page, privacy policy, and a playable copy of the app.
 
-`store/` holds the brand spec, the screenshot spec and the listing copy. `store/scenes.js` and
-`store/build-shots.py` exist only to give the store screenshots something photographic in the frames; they
-are not part of the app and never ship inside it.
+`store/` holds `icon.svg` and `feature.html`, which are the hand-written sources for the launcher icon and
+the feature graphic, plus the screenshot spec and the listing copy. Render the graphics with
+`node ../_shiptools/render-brand.js contact-sheet`. `store/scenes.js` and `store/build-shots.py` exist only
+to give the store screenshots something photographic in the frames; they are not part of the app and never
+ship inside it.
+
+`test/` holds the drive scripts that were used to find and prove the bugs in this build. See
+`test/README.md`.
 
 ## Build
 
@@ -52,6 +58,6 @@ Signing reads `android/keystore.properties`, which is not in this repository.
 
 ```sh
 python3 store/build-shots.py
-python3 -m http.server 8917 --directory web &
+python3 -m http.server 8820 --directory web &
 node ../_shiptools/shots.js store/shots.json
 ```

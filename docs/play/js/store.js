@@ -179,8 +179,9 @@ const Store = (() => {
 
   /** What the shell should schedule. One notification per roll at the lab. */
   function notifications(now = Date.now()) {
-    return atLab().filter(r => r.developAt > now).slice(0, 16).map((r, i) => ({
-      id: 100 + (r.no % 60),
+    return atLab().filter(r => r.developAt > now)
+      .sort((a, b) => a.developAt - b.developAt).slice(0, 16).map((r, i) => ({
+      id: 100 + i,
       at: r.developAt,
       title: 'Your roll is back.',
       body: `Roll ${pad(r.no)}. ${r.frames.length} exposure${r.frames.length === 1 ? '' : 's'} on ${Stocks.get(r.stock).name}, ${dateSpan(r)}.`

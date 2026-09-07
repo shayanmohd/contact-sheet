@@ -1,1 +1,5 @@
-The first release. Thirty-six exposures, no preview, no deleting, and a roll that comes back developed at eight the next morning. Six film stocks with real response curves, grain, halation and quirks, all computed on your phone. A contact sheet with a loupe under your thumb and a grease pencil for the keepers. Push or pull at the lab. Free, offline, no account.
+Bug fixes and a new face.
+
+The Back gesture now walks straight out of the app instead of replaying every screen you visited. A part roll no longer shows broken pictures for the frames you never shot. A finished roll tells you it is finished. Double taps can no longer burn a roll number.
+
+New launcher icon, a drawn film edge through the whole app, real illustrations for the empty screens, and a wind-on that still reads with animations turned off.

@@ -13,8 +13,8 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root {
-    --bg: #131110; --bg2: #1B1815; --fg: #F2ECE1; --fg2: #A79D8D; --fg3: #8F8676;
-    --hair: #2E2A23; --accent: #E08A3C; --wash: rgba(224,138,60,.10);
+    --bg: #121010; --bg2: #1A1613; --fg: #F5EEE2; --fg2: #ABA091; --fg3: #8C8374;
+    --hair: #2E2A23; --leak: #E4552B; --accent: #F2A62B; --wash: rgba(242,166,43,.10);
     --sans: Archivo, "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   * { box-sizing: border-box; }
@@ -38,7 +38,7 @@
   nav { display: flex; align-items: center; justify-content: space-between; height: 82px; }
   .mark { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 600;
           letter-spacing: .01em; }
-  .mark svg { width: 26px; height: 26px; display: block; }
+  .mark svg { width: 24px; height: 28px; display: block; }
   nav .links a { color: var(--fg2); text-decoration: none; font-size: 13px; letter-spacing: .1em;
                  text-transform: uppercase; margin-left: 24px; font-weight: 600; }
   nav .links a:hover { color: var(--fg); }
@@ -155,13 +155,26 @@
 <div class="wrap">
   <nav>
     <span class="mark">
-      <svg viewBox="0 0 108 108" aria-hidden="true">
-        <rect x="20" y="22" width="20" height="30" rx="2" fill="currentColor"/>
-        <rect x="44" y="22" width="20" height="30" rx="2" fill="currentColor"/>
-        <rect x="68" y="22" width="20" height="30" rx="2" fill="currentColor"/>
-        <rect x="20" y="56" width="20" height="30" rx="2" fill="currentColor"/>
-        <rect x="44" y="56" width="20" height="30" rx="2" fill="currentColor"/>
-        <rect x="68" y="56" width="20" height="30" rx="2" fill="#E08A3C"/>
+      <svg viewBox="30 26 48 56" aria-hidden="true">
+        <defs>
+          <radialGradient id="navleak" gradientUnits="userSpaceOnUse" cx="67" cy="34.3" r="31">
+            <stop offset="0" stop-color="#FFFDF4"/><stop offset="0.14" stop-color="#FBC748"/>
+            <stop offset="0.36" stop-color="#F4901F"/><stop offset="0.56" stop-color="#E4552B"/>
+            <stop offset="0.78" stop-color="#3A1709"/><stop offset="1" stop-color="#0C0A09"/>
+          </radialGradient>
+        </defs>
+        <rect x="35" y="30.5" width="38" height="47" rx="1.5" fill="#2B241B"/>
+        <rect x="40.97" y="34.3" width="26.06" height="39.4" rx="0.8" fill="url(#navleak)"/>
+        <g fill="#0A0908">
+          <rect x="36.92" y="35.8" width="2.15" height="3.03" rx="0.5"/><rect x="36.92" y="40.95" width="2.15" height="3.03" rx="0.5"/>
+          <rect x="36.92" y="46.11" width="2.15" height="3.03" rx="0.5"/><rect x="36.92" y="51.27" width="2.15" height="3.03" rx="0.5"/>
+          <rect x="36.92" y="56.42" width="2.15" height="3.03" rx="0.5"/><rect x="36.92" y="61.58" width="2.15" height="3.03" rx="0.5"/>
+          <rect x="36.92" y="66.73" width="2.15" height="3.03" rx="0.5"/><rect x="36.92" y="71.89" width="2.15" height="3.03" rx="0.5"/>
+          <rect x="68.94" y="35.8" width="2.15" height="3.03" rx="0.5"/><rect x="68.94" y="40.95" width="2.15" height="3.03" rx="0.5"/>
+          <rect x="68.94" y="46.11" width="2.15" height="3.03" rx="0.5"/><rect x="68.94" y="51.27" width="2.15" height="3.03" rx="0.5"/>
+          <rect x="68.94" y="56.42" width="2.15" height="3.03" rx="0.5"/><rect x="68.94" y="61.58" width="2.15" height="3.03" rx="0.5"/>
+          <rect x="68.94" y="66.73" width="2.15" height="3.03" rx="0.5"/><rect x="68.94" y="71.89" width="2.15" height="3.03" rx="0.5"/>
+        </g>
       </svg>
       Contact Sheet
     </span>
@@ -194,7 +207,7 @@
       <div><b>Thirty-six exposures</b><p>When they are gone, the roll is gone. Frames are never given back, and no setting anywhere changes that.</p></div>
       <div><b>No preview</b><p>After the shutter there is nothing to look at. Not a thumbnail, not a gallery. Only a counter going down.</p></div>
       <div><b>Tomorrow at eight</b><p>A finished roll goes to the lab and comes back the next morning. The counter shuts at eight in the evening, like a real one.</p></div>
-      <div><b>Then you look</b><p>Six strips of six, a loupe under your thumb, and a grease pencil for the ones worth keeping.</p></div>
+      <div><b>Then you look</b><p>Six strips of six at true 135 pitch, a loupe under your thumb, and a grease pencil for the ones worth keeping.</p></div>
     </div>
   </div>
 </section>
@@ -234,8 +247,8 @@
         <figcaption><b>The grease pencil.</b> Marking a keeper draws a circle by hand, the way it was done on paper. Nothing is deleted, ever.</figcaption>
       </figure>
       <figure>
-        <img class="shot" src="shots/06-lab.png" alt="The archive of sheets, with one roll still at the lab and a countdown to the morning.">
-        <figcaption><b>The wait.</b> A roll at the lab shows what is on it and when it comes back. There is nothing to see until then, and that is the point.</figcaption>
+        <img class="shot" src="shots/06-archive.png" alt="The archive of sheets, with one roll still at the lab and a countdown to the morning.">
+        <figcaption><b>The wait.</b> A roll at the lab shows what is on it, when it comes back and how long that is. There is nothing to see until then, and that is the point.</figcaption>
       </figure>
     </div>
   </section>

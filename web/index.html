@@ -10,15 +10,14 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div class="grainfield" id="grainField" aria-hidden="true"></div>
 
 <main id="stage">
 
   <!-- THE COVENANT -->
   <section class="screen" id="v-covenant" hidden>
     <div class="pad cov">
-      <div class="cov-mark" aria-hidden="true">
-        <span class="cov-frame"></span><span class="cov-frame"></span><span class="cov-frame on"></span>
-      </div>
+      <div class="cov-mark" id="covMark" aria-hidden="true"></div>
       <h1 class="cov-h">Thirty-six chances.<br>No take-backs.</h1>
       <ul class="cov-list">
         <li><b>36 exposures.</b> When they are gone, the roll is gone. Frames are never given back.</li>
@@ -44,19 +43,27 @@
     </div>
 
     <div class="topstrip" id="topStrip">
-      <button class="strip-btn" id="toSheets">Sheets</button>
+      <button class="strip-btn" id="toSheets"><span class="ctl-ico" data-ico="sheets"></span>Sheets</button>
       <button class="counter" id="rollBtn">
         <span class="counter-stock" id="cStock">No roll</span>
-        <span class="counter-num" id="cNum">--</span>
+        <span class="counter-gate" id="counterGate">
+          <span class="counter-num" id="cNum">--</span>
+        </span>
         <span class="counter-cap" id="cCap">loaded</span>
       </button>
-      <button class="strip-btn" id="toStocks">Stocks</button>
+      <button class="strip-btn" id="toStocks">Stocks<span class="ctl-ico" data-ico="stocks"></span></button>
     </div>
 
     <div class="controls" id="controls">
-      <button class="ctl" id="flashBtn" aria-label="Flash"><span class="ctl-ico flash"></span><span class="ctl-lab">Flash</span></button>
+      <button class="ctl" id="flashBtn" aria-label="Flash"><span class="ctl-ico" data-ico="flashOff"></span><span class="ctl-lab">Flash</span></button>
       <button class="shutter" id="shutterBtn" aria-label="Shutter"><span class="shutter-ring"></span><span class="shutter-core"></span></button>
-      <button class="ctl" id="faceBtn" aria-label="Switch lens"><span class="ctl-ico face"></span><span class="ctl-lab">Lens</span></button>
+      <button class="ctl" id="faceBtn" aria-label="Switch lens"><span class="ctl-ico" data-ico="lens"></span><span class="ctl-lab">Lens</span></button>
+    </div>
+
+    <div class="empty-cam" id="fullCam" hidden>
+      <p class="ec-line">The roll is finished.</p>
+      <p class="ec-sub">Thirty-six exposures, all of them used. Hand it in and it comes back developed.</p>
+      <button class="btn big" id="fullHand">Hand it in</button>
     </div>
 
     <div class="empty-cam" id="emptyCam" hidden>
@@ -65,27 +72,34 @@
       <button class="btn big" id="emptyLoad">Load a roll</button>
     </div>
 
-    <div class="windon" id="windOn" hidden><div class="ratchet" id="ratchet"></div></div>
+    <div class="windon" id="windOn" hidden>
+      <div class="wind-track"><div class="ratchet" id="ratchet"></div></div>
+      <p class="wind-lab">Winding on</p>
+    </div>
   </section>
 
   <!-- SHEETS ARCHIVE -->
   <section class="screen" id="v-sheets" hidden>
     <header class="bar">
-      <button class="bar-back" data-back aria-label="Back"></button>
+      <button class="bar-back" data-back aria-label="Back"><span class="ctl-ico" data-ico="back"></span></button>
       <h1 class="bar-t">Sheets</h1>
-      <button class="bar-act" id="toSettings">Settings</button>
+      <button class="bar-act" id="toSettings"><span class="ctl-ico" data-ico="settings"></span>Settings</button>
     </header>
     <div class="scroller"><div id="sheetsList"></div>
-      <p class="empty" id="sheetsEmpty" hidden>Nothing has come back yet. Shoot a roll, hand it in, and look here in the morning.</p>
+      <div class="empty" id="sheetsEmpty" hidden>
+        <div class="empty-art" id="sheetsEmptyArt" aria-hidden="true"></div>
+        <p class="empty-h">Nothing has come back yet.</p>
+        <p class="empty-p">Shoot a roll, hand it in over the counter, and look here in the morning.</p>
+      </div>
     </div>
   </section>
 
   <!-- ONE CONTACT SHEET -->
   <section class="screen" id="v-sheet" hidden>
     <header class="bar">
-      <button class="bar-back" data-back aria-label="Back"></button>
+      <button class="bar-back" data-back aria-label="Back"><span class="ctl-ico" data-ico="back"></span></button>
       <h1 class="bar-t" id="shTitle">Sheet</h1>
-      <button class="bar-act" id="shMenu">More</button>
+      <button class="bar-act" id="shMenu" aria-label="More"><span class="ctl-ico" data-ico="more"></span></button>
     </header>
     <div class="scroller" id="shScroll">
       <div class="sh-head">
@@ -94,11 +108,11 @@
         <p class="sh-marks" id="shMarks"></p>
       </div>
       <div class="grid" id="shGrid"></div>
-      <p class="sh-tip" id="shTip">Press and hold to bring the loupe over a frame. Tap a frame to open it.</p>
+      <p class="sh-tip" id="shTip"><span class="ctl-ico" data-ico="loupe"></span>Press and hold to bring the loupe over a frame. Tap a frame to open it.</p>
     </div>
     <div class="sheetbar">
       <span class="kept" id="shKept"></span>
-      <button class="btn ghost small" id="shSave">Save sheet</button>
+      <button class="btn ghost small" id="shSave"><span class="ctl-ico" data-ico="save"></span>Save sheet</button>
     </div>
     <div class="loupe" id="loupe" hidden><canvas id="loupeCv" width="420" height="420"></canvas></div>
   </section>
@@ -106,7 +120,7 @@
   <!-- ONE FRAME -->
   <section class="screen" id="v-frame" hidden>
     <header class="bar">
-      <button class="bar-back" data-back aria-label="Back"></button>
+      <button class="bar-back" data-back aria-label="Back"><span class="ctl-ico" data-ico="back"></span></button>
       <h1 class="bar-t" id="frTitle">Frame</h1>
       <span class="bar-act ghosted" id="frStock"></span>
     </header>
@@ -118,16 +132,16 @@
       <p class="fr-meta" id="frMeta"></p>
     </div>
     <div class="framebar">
-      <button class="btn ghost small" id="frKeep">Keep</button>
-      <button class="btn ghost small" id="frSave">Save frame</button>
-      <button class="btn small" id="frShare">Share this one</button>
+      <button class="btn ghost small" id="frKeep"><span class="ctl-ico" data-ico="keep"></span><span id="frKeepLab">Keep</span></button>
+      <button class="btn ghost small" id="frSave" aria-label="Save frame"><span class="ctl-ico" data-ico="save"></span></button>
+      <button class="btn small" id="frShare"><span class="ctl-ico" data-ico="share"></span><span id="frShareLab">Share this one</span></button>
     </div>
   </section>
 
   <!-- STOCK SHELF -->
   <section class="screen" id="v-stocks" hidden>
     <header class="bar">
-      <button class="bar-back" data-back aria-label="Back"></button>
+      <button class="bar-back" data-back aria-label="Back"><span class="ctl-ico" data-ico="back"></span></button>
       <h1 class="bar-t">Stocks</h1>
       <span class="bar-act ghosted">Six</span>
     </header>
@@ -149,7 +163,7 @@
   <!-- ONE STOCK -->
   <section class="screen" id="v-stock" hidden>
     <header class="bar">
-      <button class="bar-back" data-back aria-label="Back"></button>
+      <button class="bar-back" data-back aria-label="Back"><span class="ctl-ico" data-ico="back"></span></button>
       <h1 class="bar-t" id="stTitle">Stock</h1>
       <span class="bar-act ghosted" id="stIso"></span>
     </header>
@@ -169,7 +183,7 @@
   <!-- SETTINGS -->
   <section class="screen" id="v-settings" hidden>
     <header class="bar">
-      <button class="bar-back" data-back aria-label="Back"></button>
+      <button class="bar-back" data-back aria-label="Back"><span class="ctl-ico" data-ico="back"></span></button>
       <h1 class="bar-t">Settings</h1>
       <span class="bar-act ghosted"></span>
     </header>
@@ -180,7 +194,7 @@
           <option value="6">6:00</option><option value="7">7:00</option>
           <option value="8">8:00</option><option value="9">9:00</option><option value="10">10:00</option>
         </select>
-        <p class="help">One batch a day. The counter shuts at 20:00, and a roll handed in after that waits for the next morning's batch.</p>
+        <p class="help">One batch a day. The counter shuts at 20:00, so a roll handed in after that misses the collection and comes back the morning after next. The app tells you the day and the hour as you hand it over.</p>
       </div>
 
       <div class="field">
@@ -199,7 +213,7 @@
       <div class="field" id="notifyField" hidden>
         <label>Development notice</label>
         <p class="help" id="notifyState"></p>
-        <button class="btn ghost small" id="notifyBtn">Allow notifications</button>
+        <button class="btn ghost small" id="notifyBtn"><span class="ctl-ico" data-ico="bell"></span>Allow notifications</button>
       </div>
 
       <hr class="rule">
@@ -207,7 +221,7 @@
       <p class="help" id="usageLine">Counting what is stored.</p>
       <p class="help">Frames live in this app's own storage and nowhere else. There is no account, no upload and no internet permission, so nothing can leave unless you export it yourself.</p>
       <div class="btnrow">
-        <button class="btn ghost small danger" id="eraseBtn">Erase everything</button>
+        <button class="btn ghost small danger" id="eraseBtn"><span class="ctl-ico" data-ico="erase"></span><span id="eraseLab">Erase everything</span></button>
       </div>
 
       <hr class="rule">
@@ -219,6 +233,7 @@
   <section class="screen" id="v-lab" hidden>
     <div class="lab">
       <div class="safelight" aria-hidden="true"></div>
+      <div class="lab-spool" id="labSpool" aria-hidden="true"></div>
       <p class="lab-k">Developing</p>
       <p class="lab-roll" id="labRoll"></p>
       <div class="lab-bar"><div class="lab-fill" id="labFill"></div></div>
@@ -231,7 +246,7 @@
 <!-- REWIND AND THE COUNTER -->
 <div class="modal" id="rewind" hidden>
   <div class="modal-panel">
-    <div class="spool" id="spool" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="rw-spool" id="spool" aria-hidden="true"></div>
     <p class="modal-k" id="rwK">Rewinding</p>
     <p class="modal-h" id="rwH"></p>
     <div id="rwLab" hidden>
@@ -270,6 +285,7 @@
 
 <p id="toast" class="toast" hidden></p>
 
+<script src="js/mark.js"></script>
 <script src="js/stocks.js"></script>
 <script src="js/db.js"></script>
 <script src="js/store.js"></script>

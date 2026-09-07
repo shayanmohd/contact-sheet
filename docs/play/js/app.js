@@ -7,10 +7,26 @@ const App = (() => {
   const pad = Store.pad;
 
   let view = 'camera';
-  const stack = [];
+  /* Where Back goes from each screen. A flat map instead of a history stack, so the
+     Back gesture always walks towards the camera and always leaves the app, however
+     long the user has been wandering. */
+  const PARENT = { sheets: 'camera', sheet: 'sheets', frame: 'sheet',
+                   stocks: 'camera', stock: 'stocks', settings: 'sheets' };
   let curRoll = null, curFrame = 0, curStock = null;
   let winding = false, developing = false, pendingStock = null, pendingPush = 0;
   let flashWanted = false, grainUrl = '';
+
+  /* One tap is one action. A second tap inside the same gesture is the phone bouncing,
+     not the user asking twice, and on this app asking twice costs a roll. */
+  function once(fn, ms) {
+    let busy = false;
+    return async function (...a) {
+      if (busy) return;
+      busy = true;
+      try { return await fn.apply(this, a); }
+      finally { setTimeout(() => { busy = false; }, ms || 600); }
+    };
+  }
 
   /* ---------- chrome ---------- */
   let toastTimer = null;
@@ -26,9 +42,9 @@ const App = (() => {
   function closeModals() { MODALS.forEach(m => { $(m).hidden = true; }); }
   const modalOpen = () => MODALS.some(m => !$(m).hidden);
 
-  function show(v, push) {
-    if (push !== false && v !== view) stack.push(view);
+  function show(v) {
     view = v;
+    document.body.classList.toggle('on-camera', v === 'camera');
     $$('#stage .screen').forEach(s => { s.hidden = s.id !== 'v-' + v; });
     if (v === 'camera') startCamera(); else Cam.stop();
     if (v === 'sheets') renderSheets();
@@ -36,7 +52,6 @@ const App = (() => {
     if (v === 'stocks') renderShelf();
     if (v === 'settings') renderSettings();
   }
-  function go(v) { show(v, true); }
 
   /* ---------- camera ---------- */
   function makeGrain() {
@@ -100,13 +115,25 @@ const App = (() => {
   function renderCamera() {
     const r = Store.roll;
     const n = Store.left();
+    const full = !!r && n === 0;
     $('#cStock').textContent = r ? Stocks.get(r.stock).name.toUpperCase() : 'No roll';
     $('#cNum').textContent = r ? pad(n) : '--';
-    $('#cNum').classList.toggle('low', !!r && n <= 6);
-    $('#cCap').textContent = r ? (n === 1 ? 'frame left' : 'frames left') : 'loaded';
+    $('#cNum').classList.toggle('low', !!r && n <= 6 && n > 0);
+    $('#cNum').classList.toggle('spent', full);
+    $('#cNum').classList.toggle('none', !r);
+    $('#cCap').textContent = r ? (full ? 'roll finished' : n === 1 ? 'frame left' : 'frames left') : 'loaded';
     $('#emptyCam').hidden = !!r;
-    $('#controls').hidden = !r;
-    $('#flashBtn').classList.toggle('on', flashWanted && Cam.torchOn);
+    $('#fullCam').hidden = !full;
+    $('#controls').hidden = !r || full;
+    $('#vfShell').hidden = !r || full;
+    const fOn = flashWanted && Cam.torchOn;
+    $('#flashBtn').classList.toggle('on', fOn);
+    $('#flashBtn').setAttribute('aria-pressed', String(fOn));
+    const fIco = $('#flashBtn .ctl-ico');
+    if (fIco && fIco.dataset.ico !== (fOn ? 'flash' : 'flashOff')) {
+      fIco.dataset.ico = fOn ? 'flash' : 'flashOff';
+      fIco.innerHTML = Mark.ICONS[fIco.dataset.ico];
+    }
     $('#shutterBtn').disabled = !(r && n > 0 && Cam.live && !winding);
   }
 
@@ -119,20 +146,32 @@ const App = (() => {
     el.classList.add('go');
   }
 
-  /** 1.2 seconds of ratchet. The pacing of the whole app lives in this function. */
+  /** 1.2 seconds of ratchet. The pacing of the whole app lives in this function.
+      The bar is real progress through a real wait, not decoration, so it is driven by
+      frames rather than a CSS transition: with animations turned off at the system level
+      a transition would snap to full and tell the user the wait was over when it was not. */
   function windOn(ms) {
     return new Promise(res => {
-      const bar = $('#ratchet'), box = $('#windOn');
-      const dur = ms || 1200;
+      const bar = $('#ratchet'), box = $('#windOn'), gate = $('#counterGate');
+      const pitch = Mark.gatePitchPx(gate ? gate.offsetWidth || 78 : 78);
+      const dur = ms || 1200, t0 = performance.now();
       box.hidden = false;
-      bar.style.transition = 'none';
       bar.style.width = '0%';
-      void bar.offsetWidth;
-      bar.style.transition = `width ${dur}ms cubic-bezier(.5,.02,.72,1)`;
-      bar.style.width = '100%';
       Sound.windOn(dur);
       Sound.hWind();
-      setTimeout(() => { box.hidden = true; res(); }, dur + 60);
+      const step = now => {
+        const p = Math.min(1, (now - t0) / dur);
+        const e = p < 1 ? p * p * 0.55 + p * 0.45 : 1;   // the sprocket bites, then runs on
+        bar.style.width = (e * 100).toFixed(2) + '%';
+        // the sprocket run in the counter gate advances exactly one perforation per frame
+        if (gate) gate.style.setProperty('--wind', (-e * pitch).toFixed(2) + 'px');
+        if (p < 1) requestAnimationFrame(step);
+        else {
+          if (gate) gate.style.setProperty('--wind', '0px');   // one pitch on is back in phase
+          setTimeout(() => { box.hidden = true; res(); }, 60);
+        }
+      };
+      requestAnimationFrame(step);
     });
   }
 
@@ -208,7 +247,7 @@ const App = (() => {
       doLoad(s);
       toast(line, 4200);
     } else {
-      show('camera', false);
+      show('camera');
       renderCamera();
       toast(line, 4600);
     }
@@ -228,7 +267,7 @@ const App = (() => {
   async function doLoad(stockId) {
     Store.loadRoll(stockId);
     scheduleNotifications();
-    show('camera', false);
+    show('camera');
     renderCamera();
     applyStockHint();
     Sound.wake();
@@ -246,17 +285,22 @@ const App = (() => {
     if (!dueRolls.length) return false;
     developing = true;
     Cam.stop();
-    show('lab', false);
+    show('lab');
     let last = dueRolls[0];                       // newest roll: the one to open afterwards
-    for (const r of dueRolls.slice().reverse()) {  // develop oldest first, the way a batch runs
-      $('#labRoll').textContent = `Roll ${pad(r.no)}`;
-      $('#labN').textContent = `0 of ${r.frames.length}`;
-      $('#labFill').style.width = '0%';
-      await new Promise(res => setTimeout(res, 500));
-      await Film.developRoll(r, (d, t) => {
-        $('#labFill').style.width = Math.round(d / t * 100) + '%';
-        $('#labN').textContent = `${d} of ${t}`;
-      });
+    try {
+      for (const r of dueRolls.slice().reverse()) {  // develop oldest first, the way a batch runs
+        $('#labRoll').textContent = `Roll ${pad(r.no)}`;
+        $('#labN').textContent = `0 of ${r.frames.length}`;
+        setLabProgress(0, r.frames.length);
+        await new Promise(res => setTimeout(res, 500));
+        await Film.developRoll(r, (d, t) => setLabProgress(d, t));
+      }
+    } catch (e) {
+      developing = false;
+      console.warn('the batch stopped early', e);
+      show('sheets');
+      toast('Development stopped early. What did come back is in the archive.', 4600);
+      return true;
     }
     developing = false;
     Sheet.forget();
@@ -265,23 +309,32 @@ const App = (() => {
     scheduleNotifications();
     if (last) {
       curRoll = Store.byId(last.id);
-      stack.length = 0;
-      stack.push('camera', 'sheets');
-      show('sheet', false);
+      show('sheet');
       toast(`Roll ${pad(last.no)} is back. ${last.frames.length} exposures.`, 4200);
     } else {
-      show('camera', false);
+      show('camera');
     }
     return true;
   }
 
+  function setLabProgress(done, total) {
+    const pct = total ? Math.round(done / total * 100) : 0;
+    $('#labFill').style.width = pct + '%';
+    $('#labN').textContent = `${done} of ${total}`;
+    const sp = $('#labSpool');
+    if (sp) sp.style.setProperty('--turn', (done * 42) + 'deg');
+  }
+
   /* ---------- sheets archive ---------- */
+  let renderToken = 0;
   async function renderSheets() {
+    const mine = ++renderToken;
     const list = $('#sheetsList');
     const rolls = Store.rolls;
     list.innerHTML = '';
     $('#sheetsEmpty').hidden = rolls.length > 0;
     for (const r of rolls) {
+      if (mine !== renderToken) return;
       const s = Stocks.get(r.stock);
       const card = document.createElement('button');
       card.className = 'rollcard' + (r.state === 'lab' ? ' waiting' : '');
@@ -298,11 +351,13 @@ const App = (() => {
         const urls = await Sheet.strip(r, 6);
         card.innerHTML =
           `<div class="rc-top"><span class="rc-stock">${s.name}</span><span class="rc-no">Roll ${pad(r.no)}</span></div>` +
-          `<div class="rc-strip">${urls.map(u => `<img alt=""${u ? ` src="${u}"` : ''}>`).join('')}</div>` +
+          `<div class="rc-strip">${urls.map(u => u ? `<img alt="" src="${u}">` : '<span class="blank"></span>').join('')}</div>` +
           `<p class="rc-meta">${r.frames.length} exposures. ${Store.dateSpan(r)}. ` +
           `<span class="${kept ? 'rc-kept' : ''}">${kept ? kept + ' kept' : 'none kept'}</span></p>`;
-        card.onclick = () => { curRoll = r; go('sheet'); };
+        card.onclick = () => { curRoll = r; show('sheet'); };
       }
+      if (mine !== renderToken) return;
+      card.style.setProperty('--i', String(list.children.length));
       list.appendChild(card);
     }
   }
@@ -310,7 +365,7 @@ const App = (() => {
   /* ---------- one sheet ---------- */
   async function renderSheet() {
     const r = curRoll && Store.byId(curRoll.id);
-    if (!r) { show('sheets', false); return; }
+    if (!r) { show('sheets'); return; }
     curRoll = r;
     const s = Stocks.get(r.stock);
     $('#shTitle').textContent = 'Roll ' + pad(r.no);
@@ -320,10 +375,12 @@ const App = (() => {
     if (r.push > 0) marks.push('Push +1');
     if (r.push < 0) marks.push('Pull -1');
     if (r.discreet) marks.push('Discreet');
-    $('#shMarks').textContent = marks.join('   ');
+    $('#shMarks').innerHTML = marks.map(m => `<span>${m}</span>`).join('');
     $('#shMarks').hidden = !marks.length;
     updateKept();
+    const mine = ++renderToken;
     await Sheet.renderGrid(r, $('#shGrid'));
+    if (mine !== renderToken) return;
     requestAnimationFrame(() => Sheet.fitGrid($('#shGrid'), $('#shScroll'), 288));
   }
   function updateKept() {
@@ -345,25 +402,29 @@ const App = (() => {
     const s = Stocks.get(r.stock);
     $('#frTitle').textContent = `Frame ${pad(n)}`;
     $('#frStock').textContent = s.name;
-    $('#frMeta').textContent = `${Store.longDate(f.at)}   ${Store.clockTime(f.at)}   Roll ${pad(r.no)}`;
+    $('#frMeta').innerHTML = [Store.longDate(f.at), Store.clockTime(f.at), 'Roll ' + pad(r.no)]
+      .map(t => `<span>${t}</span>`).join('');
     const url = await DB.url(DB.frmKey(r.id, n));
     $('#frImg').src = url || '';
     $('#frPencilPath').setAttribute('d', Sheet.pencilPath(n));
     paintFrameButtons();
-    go('frame');
+    show('frame');
   }
   function paintFrameButtons() {
     const r = curRoll && Store.byId(curRoll.id);
     if (!r) return;
     const f = r.frames.find(x => x.n === curFrame);
     const kept = !!(f && f.keeper);
-    $('#frKeep').textContent = kept ? 'Kept' : 'Keep';
+    $('#frKeepLab').textContent = kept ? 'Kept' : 'Keep';
     $('#frKeep').classList.toggle('on', kept);
+    $('#frKeep').setAttribute('aria-pressed', String(kept));
     $('#frPencil').style.opacity = kept ? '1' : '0';
     const share = $('#frShare');
     const used = r.shared && r.shared !== curFrame;
     share.disabled = false;
-    share.textContent = used ? `Frame ${pad(r.shared)} was sent` : (r.shared === curFrame ? 'Send it again' : 'Share this one');
+    share.classList.toggle('spent', !!used);
+    $('#frShareLab').textContent = used ? `Frame ${pad(r.shared)} was sent`
+      : (r.shared === curFrame ? 'Send it again' : 'Share this one');
   }
 
   /* ---------- the shelf ---------- */
@@ -392,7 +453,8 @@ const App = (() => {
       const inCamera = Store.roll && Store.roll.stock === s.id;
       b.innerHTML = boxHtml(s) +
         `<span class="under${inCamera ? ' loaded' : ''}">${inCamera ? 'In the camera' : s.line}</span>`;
-      b.onclick = () => { curStock = s; renderStock(); go('stock'); };
+      b.onclick = once(() => { curStock = s; renderStock(); show('stock'); });
+      b.style.setProperty('--i', String(shelf.children.length));
       shelf.appendChild(b);
     }
   }
@@ -476,15 +538,16 @@ const App = (() => {
 
   /* ---------- wiring ---------- */
   function bind() {
-    $$('[data-back]').forEach(b => { b.onclick = () => { if (!back()) show('camera', false); }; });
+    $$('[data-back]').forEach(b => { b.onclick = () => { if (!back()) show('camera'); }; });
 
-    $('#covGo').onclick = () => { Sound.wake(); Store.onboarded(true); stack.length = 0; go('stocks'); };
+    $('#covGo').onclick = once(() => { Sound.wake(); Store.onboarded(true); show('stocks'); });
 
-    $('#toSheets').onclick = () => go('sheets');
-    $('#toStocks').onclick = () => go('stocks');
-    $('#toSettings').onclick = () => go('settings');
-    $('#emptyLoad').onclick = () => { Sound.wake(); go('stocks'); };
+    $('#toSheets').onclick = () => show('sheets');
+    $('#toStocks').onclick = () => show('stocks');
+    $('#toSettings').onclick = () => show('settings');
+    $('#emptyLoad').onclick = once(() => { Sound.wake(); show('stocks'); });
     $('#vfRetry').onclick = () => startCamera();
+    $('#fullHand').onclick = once(() => { const r = Store.roll; if (r) handIn(r, 'Rewinding'); });
 
     $('#shutterBtn').onclick = () => fire();
     $('#flashBtn').onclick = async () => {
@@ -507,7 +570,7 @@ const App = (() => {
 
     $('#rollBtn').onclick = () => {
       const r = Store.roll;
-      if (!r) { go('stocks'); return; }
+      if (!r) { show('stocks'); return; }
       const s = Stocks.get(r.stock);
       $('#rpStock').textContent = s.name;
       $('#rpMeta').textContent = r.frames.length
@@ -517,29 +580,29 @@ const App = (() => {
       openModal('#rollPanel');
     };
     $('#rpClose').onclick = closeModals;
-    $('#rpNew').onclick = () => { closeModals(); go('stocks'); };
-    $('#rpHand').onclick = () => {
+    $('#rpNew').onclick = () => { closeModals(); show('stocks'); };
+    $('#rpHand').onclick = once(() => {
       const r = Store.roll;
       closeModals();
       if (!r) return;
       if (!r.frames.length) {
         Store.unload();
-        show('camera', false); renderCamera();
+        show('camera'); renderCamera();
         toast('The roll came out unexposed. Nothing was used up.', 3400);
         return;
       }
       handIn(r, 'Rewinding');
-    };
+    });
 
     $$('#pushSeg button').forEach(b => { b.onclick = () => { Sound.hTap(); setPushSeg(Number(b.dataset.v)); }; });
-    $('#rwGo').onclick = commitHandIn;
+    $('#rwGo').onclick = once(commitHandIn, 1400);
 
-    $('#stLoad').onclick = () => { if (curStock) requestLoad(curStock.id); };
+    $('#stLoad').onclick = once(() => { if (curStock) requestLoad(curStock.id); }, 1400);
 
     $('#shGrid').__onOpen = n => openFrame(n);
     Sheet.attachLoupe($('#shGrid'), $('#loupe'), $('#loupeCv'), () => curRoll);
 
-    $('#shSave').onclick = () => saveSheet();
+    $('#shSave').onclick = once(() => saveSheet(), 1200);
     $('#shMenu').onclick = () => {
       const r = curRoll && Store.byId(curRoll.id);
       if (!r) return;
@@ -547,7 +610,7 @@ const App = (() => {
       openModal('#sheetMenu');
     };
     $('#smClose').onclick = closeModals;
-    $('#smSave').onclick = () => { closeModals(); saveSheet(); };
+    $('#smSave').onclick = once(() => { closeModals(); return saveSheet(); }, 1200);
     $('#smDelete').onclick = async () => {
       const btn = $('#smDelete');
       if (!btn.dataset.armed) {
@@ -566,7 +629,7 @@ const App = (() => {
       Store.forgetRoll(r.id);
       Sheet.forget();
       curRoll = null;
-      show('sheets', false);
+      show('sheets');
       toast(`Roll ${pad(r.no)} is gone.`);
     };
 
@@ -581,7 +644,7 @@ const App = (() => {
       paintFrameButtons();
       updateKept();
     };
-    $('#frSave').onclick = async () => {
+    $('#frSave').onclick = once(async () => {
       const r = curRoll && Store.byId(curRoll.id);
       if (!r) return;
       const blob = await DB.get(DB.frmKey(r.id, curFrame));
@@ -589,8 +652,8 @@ const App = (() => {
       const name = `contact-sheet-roll${pad(r.no)}-frame${pad(curFrame)}.jpg`;
       const res = await Export.save(name, blob);
       toast(res ? 'Frame saved at full size.' : 'Saving did not work here.');
-    };
-    $('#frShare').onclick = async () => {
+    }, 1200);
+    $('#frShare').onclick = once(async () => {
       const r = curRoll && Store.byId(curRoll.id);
       if (!r) return;
       if (r.shared && r.shared !== curFrame) {
@@ -604,7 +667,7 @@ const App = (() => {
       if (res === 'cancelled') return;
       if (res) { Store.markShared(r.id, curFrame); paintFrameButtons(); }
       toast(res === 'shared' ? 'Sent.' : res ? 'Saved where your downloads go.' : 'Sharing did not work here.');
-    };
+    }, 1200);
 
     $('#setHour').onchange = e => { Store.settings({ developHour: Number(e.target.value) }); scheduleNotifications(); };
     $$('#setSound button').forEach(b => {
@@ -619,8 +682,10 @@ const App = (() => {
       const btn = $('#eraseBtn');
       if (!btn.dataset.armed) {
         btn.dataset.armed = '1';
-        btn.textContent = 'Tap again to erase everything';
-        setTimeout(() => { delete btn.dataset.armed; btn.textContent = 'Erase everything'; }, 4000);
+        $('#eraseLab').textContent = 'Tap again to erase everything';
+        btn.classList.add('armed');
+        setTimeout(() => { delete btn.dataset.armed; btn.classList.remove('armed');
+                           $('#eraseLab').textContent = 'Erase everything'; }, 4000);
         return;
       }
       await DB.clear();
@@ -641,33 +706,135 @@ const App = (() => {
   async function saveSheet() {
     const r = curRoll && Store.byId(curRoll.id);
     if (!r) return;
+    const btn = $('#shSave');
+    btn.classList.add('busy');
+    btn.disabled = true;
     toast('Printing the sheet.');
-    const blob = await Export.sheet(r);
-    const res = await Export.save(`contact-sheet-roll${pad(r.no)}.jpg`, blob);
-    toast(res === 'download' ? 'Sheet downloaded.' : res ? 'Sheet saved where your downloads go.' : 'Saving did not work here.');
+    try {
+      const blob = await Export.sheet(r);
+      const res = await Export.save(`contact-sheet-roll${pad(r.no)}.jpg`, blob);
+      toast(res === 'download' ? 'Sheet downloaded.' : res ? 'Sheet saved where your downloads go.' : 'Saving did not work here.');
+    } catch (e) {
+      toast('The sheet could not be printed on this device.');
+    } finally {
+      btn.classList.remove('busy');
+      btn.disabled = false;
+    }
+  }
+
+  /* ---------- the drawn parts ---------- */
+  function paintGraphics() {
+    $$('[data-ico]').forEach(el => { el.innerHTML = Mark.ICONS[el.dataset.ico] || ''; });
+
+    // The mark: three frames of film with the light leak running off the last one.
+    $('#covMark').innerHTML = Mark.strip({ frames: 3, leak: 1, numbers: true, from: 34, id: 'cov' });
+
+    // The counter gate: one frame's worth of perforations behind the number.
+    $('#counterGate').insertAdjacentHTML('afterbegin', Mark.gate());
+
+    // Nothing back yet: a length of film going into the envelope it comes home in.
+    $('#sheetsEmptyArt').innerHTML = emptyArt();
+
+    // The lab spool, and the rewind spool, are the same drawn reel at two sizes.
+    $('#labSpool').innerHTML = spoolSvg('lab');
+    $('#spool').innerHTML = spoolSvg('rw');
+  }
+
+  /** A reel of film. `--turn` on the element rotates the core. */
+  function spoolSvg(id) {
+    let teeth = '';
+    for (let i = 0; i < 12; i++) {
+      const a = i * 30 * Math.PI / 180;
+      teeth += `<rect x="${(31 + Math.cos(a) * 15).toFixed(2)}" y="${(31 + Math.sin(a) * 15).toFixed(2)}" ` +
+               `width="4.4" height="2.6" rx="0.8" transform="rotate(${i * 30} ${(33.2 + Math.cos(a) * 15).toFixed(2)} ${(32.3 + Math.sin(a) * 15).toFixed(2)})"/>`;
+    }
+    return `<svg viewBox="0 0 66 66" aria-hidden="true">
+  <defs><radialGradient id="${id}core" cx="0.38" cy="0.32" r="0.78">
+    <stop offset="0" stop-color="#3A322A"/><stop offset="1" stop-color="#191512"/></radialGradient></defs>
+  <circle cx="33" cy="33" r="30" fill="none" stroke="#2E2A24" stroke-width="1.4"/>
+  <g class="sp-turn">
+    <circle cx="33" cy="33" r="25.5" fill="url(#${id}core)"/>
+    <circle cx="33" cy="33" r="25.5" fill="none" stroke="#453C31" stroke-width="1"/>
+    <g fill="#0E0C0B">${teeth}</g>
+    <circle cx="33" cy="33" r="8.4" fill="#100E0C" stroke="#5A4E3F" stroke-width="1.2"/>
+    <path d="M33 24.6v-4.2M33 41.4v4.2M24.6 33h-4.2M41.4 33h4.2" stroke="#5A4E3F" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+  <path class="sp-lead" d="M58.4 33c0 6-3 9.6-8 9.6" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"/>
+</svg>`;
+  }
+
+  /** The empty archive: the envelope a roll comes home in, with the sheet half out of it
+      and the light leak still on the last frame. The same film edge as the mark. */
+  function emptyArt() {
+    return `<svg viewBox="0 0 210 132" aria-hidden="true">
+  <defs>
+    <linearGradient id="envg" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#3A322A"/><stop offset="1" stop-color="#231E19"/>
+    </linearGradient>
+    <linearGradient id="filmg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2C2620"/><stop offset="1" stop-color="#3A322A"/>
+    </linearGradient>
+    <linearGradient id="artleak" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE1A6" stop-opacity="0.95"/>
+      <stop offset="0.35" stop-color="#F2A62B" stop-opacity="0.6"/>
+      <stop offset="0.8" stop-color="#E4552B" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(26 6) rotate(-9)">
+    <rect width="126" height="30" rx="1" fill="url(#filmg)"/>
+    <rect x="8" y="5" width="30" height="20" rx="0.8" fill="#0C0A09"/>
+    <rect x="42" y="5" width="30" height="20" rx="0.8" fill="#0C0A09"/>
+    <rect x="76" y="5" width="30" height="20" rx="0.8" fill="#0C0A09"/>
+    <rect x="76" y="5" width="30" height="20" rx="0.8" fill="url(#artleak)"/>
+    <g fill="#0A0908">${perfBand(126, 30)}</g>
+    <g fill="none" stroke="#4B4136" stroke-width="0.5">
+      <rect x="8" y="5" width="30" height="20" rx="0.8"/>
+      <rect x="42" y="5" width="30" height="20" rx="0.8"/>
+      <rect x="76" y="5" width="30" height="20" rx="0.8"/>
+    </g>
+  </g>
+  <g transform="translate(48 44)">
+    <path d="M3 0h114a3 3 0 0 1 3 3v76a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3z"
+          fill="url(#envg)" stroke="#544838" stroke-width="1.4"/>
+    <path d="M0 4 60 40 120 4" fill="none" stroke="#6A5C48" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M16 60h50M16 70h30" stroke="#4A4136" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="100" cy="66" r="9" fill="none" stroke="var(--accent)" stroke-width="1.8" opacity="0.75"/>
+    <path d="M95.8 66.2l3.2 3.2 5.6-6.6" fill="none" stroke="var(--accent)" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+  </g>
+</svg>`;
+  }
+  function perfBand(w, h) {
+    let d = '';
+    for (let x = 2.4; x + 2.8 < w; x += 4.6) {
+      d += `<rect x="${x.toFixed(1)}" y="1.5" width="2.8" height="2" rx="0.5"/>` +
+           `<rect x="${x.toFixed(1)}" y="${(h - 3.5).toFixed(1)}" width="2.8" height="2" rx="0.5"/>`;
+    }
+    return d;
   }
 
   /* ---------- lifecycle ---------- */
   async function init() {
+    paintGraphics();
     grainUrl = makeGrain();
+    $('#grainField').style.backgroundImage = `url(${grainUrl})`;
     Cam.attach($('#vf'));
     bind();
     Cam.on(() => { if (view === 'camera') { camState(); renderCamera(); } });
     fitViewfinder();
-    if (!Store.onboarded()) { show('covenant', false); return; }
+    if (!Store.onboarded()) { show('covenant'); return; }
     scheduleNotifications();
     if (await checkLab()) return;
-    show('camera', false);
+    show('camera');
     renderCamera();
   }
 
   function back() {
     if (modalOpen()) { closeModals(); return true; }
-    if (view === 'lab') return true;
-    if (view === 'covenant') return false;
-    if (stack.length) { show(stack.pop(), false); return true; }
-    if (view !== 'camera') { show('camera', false); return true; }
-    return false;
+    if (view === 'lab') return true;              // the lab is not a screen you walk out of
+    const up = PARENT[view];
+    if (up) { show(up); return true; }
+    return false;                                  // the camera and the covenant are the root
   }
   function onPause() { Cam.stop(); }
   async function onResume() {
@@ -679,7 +846,7 @@ const App = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { back, onPause, onResume, show: go, toast, checkLab, openFrame, renderCamera };
+  return { back, onPause, onResume, show, toast, checkLab, openFrame, renderCamera };
 })();
 
 // A top-level const does not become a property of window in a classic script, and

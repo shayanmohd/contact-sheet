@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <!-- Contact Sheet. One frame of 135 film stood upright, the perforation runs down both
+       rebates at their true 4.75mm pitch, and a light leak burning in from the top right
+       corner the way it does off the cassette mouth. Kodak yellow into film orange, on the
+       near black of a darkroom. -->
+  <defs>
+    <linearGradient id="room" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#241C15"/>
+      <stop offset="0.46" stop-color="#141110"/>
+      <stop offset="1" stop-color="#090807"/>
+    </linearGradient>
+    <radialGradient id="safelight" cx="0.78" cy="0.16" r="0.8">
+      <stop offset="0" stop-color="#FFC24A" stop-opacity="0.55"/>
+      <stop offset="0.34" stop-color="#E4552B" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#E4552B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="base" x1="0.05" y1="0" x2="0.95" y2="1">
+      <stop offset="0" stop-color="#40382E"/>
+      <stop offset="0.38" stop-color="#2B241B"/>
+      <stop offset="1" stop-color="#171310"/>
+    </linearGradient>
+    <!-- the leak, hot at the corner and gone by the far side of the frame -->
+    <!-- a leak spreads out from the corner the light got in at, so it is a radial and
+         not a wash: hot core, Kodak yellow, film orange, then nothing but base black -->
+    <radialGradient id="leak" gradientUnits="userSpaceOnUse" cx="67.03" cy="34.30" r="37">
+      <stop offset="0" stop-color="#FFFDF4"/>
+      <stop offset="0.07" stop-color="#FFE9AE"/>
+      <stop offset="0.17" stop-color="#FBC748"/>
+      <stop offset="0.29" stop-color="#F4901F"/>
+      <stop offset="0.42" stop-color="#E4552B"/>
+      <stop offset="0.55" stop-color="#8E2E17"/>
+      <stop offset="0.68" stop-color="#3A1709"/>
+      <stop offset="0.82" stop-color="#0D0B0A"/>
+      <stop offset="1" stop-color="#0A0908"/>
+    </radialGradient>
+    <radialGradient id="hot" gradientUnits="userSpaceOnUse" cx="68.5" cy="33.2" r="20">
+      <stop offset="0" stop-color="#FFFEF8" stop-opacity="1"/>
+      <stop offset="0.16" stop-color="#FFF0C8" stop-opacity="0.92"/>
+      <stop offset="0.42" stop-color="#FFCE62" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#F2A62B" stop-opacity="0"/>
+    </radialGradient>
+    <!-- light coming through the perforations nearest the leak -->
+    <radialGradient id="thru" gradientUnits="userSpaceOnUse" cx="69" cy="32" r="21">
+      <stop offset="0" stop-color="#FFF6DC" stop-opacity="0.95"/>
+      <stop offset="0.42" stop-color="#F9BC3C" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#F2A62B" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.20"/>
+      <stop offset="0.42" stop-color="#FFFFFF" stop-opacity="0.03"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.30"/>
+    </linearGradient>
+    <clipPath id="win"><rect x="40.97" y="34.30" width="26.06" height="39.40" rx="0.8"/></clipPath>
+    <clipPath id="filmclip"><rect x="35.0" y="30.5" width="38.0" height="47.0" rx="1.5"/></clipPath>
+    <filter id="drop" filterUnits="userSpaceOnUse" x="0" y="0" width="108" height="108">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.4"/>
+      <feOffset dy="3"/>
+      <feFlood flood-color="#280E02" flood-opacity="0.8"/>
+      <feComposite in2="SourceAlpha" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="bloom" filterUnits="userSpaceOnUse" x="0" y="0" width="108" height="108">
+      <feGaussianBlur stdDeviation="4.6"/>
+    </filter>
+  </defs>
+
+  <g id="bg">
+    <rect width="108" height="108" fill="url(#room)"/>
+    <rect width="108" height="108" fill="url(#safelight)"/>
+    <circle cx="21" cy="19" r="0.7" fill="#F6D9A0" opacity="0.28"/>
+    <circle cx="89" cy="87" r="0.6" fill="#F6D9A0" opacity="0.2"/>
+    <circle cx="16" cy="87" r="0.5" fill="#F6D9A0" opacity="0.16"/>
+    <circle cx="92" cy="15" r="0.85" fill="#FFEBC4" opacity="0.34"/>
+  </g>
+
+  <g id="fg">
+    <!-- light spilling out past the edge of the film, so it reads as a leak and not a fill -->
+    <path d="M73.0 30.5 L73.0 51.5 L49.0 30.5 Z" fill="#FFD173" opacity="0.55" filter="url(#bloom)"/>
+    <g filter="url(#drop)">
+      <rect x="35.0" y="30.5" width="38.0" height="47.0" rx="1.5" fill="url(#base)"/>
+      <g clip-path="url(#filmclip)">
+        <rect x="40.97" y="34.30" width="26.06" height="39.40" rx="0.8" fill="#0B0A09"/>
+        <g clip-path="url(#win)">
+          <rect x="40.97" y="34.30" width="26.06" height="39.40" fill="url(#leak)"/>
+          <rect x="40.97" y="34.30" width="26.06" height="39.40" fill="url(#hot)"/>
+        </g>
+        <!-- the leak carries on across the rebate, as it does on real film -->
+        <path d="M73.0 30.5 L73.0 45.5 L56.0 30.5 Z" fill="url(#hot)" opacity="0.95"/>
+        <g fill="#0A0908"><rect x="36.91" y="34.44" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="39.59" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="44.75" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="49.91" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="55.06" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="60.22" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="65.38" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="70.54" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="34.44" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="39.59" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="44.75" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="49.91" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="55.06" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="60.22" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="65.38" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="70.54" width="2.15" height="3.03" rx="0.52"/></g>
+        <g fill="url(#thru)"><rect x="36.91" y="34.44" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="39.59" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="44.75" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="49.91" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="55.06" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="60.22" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="65.38" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="70.54" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="34.44" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="39.59" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="44.75" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="49.91" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="55.06" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="60.22" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="65.38" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="70.54" width="2.15" height="3.03" rx="0.52"/></g>
+        <g fill="none" stroke="#FFE7B4" stroke-width="0.14" opacity="0.26"><rect x="36.91" y="34.44" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="39.59" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="44.75" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="49.91" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="55.06" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="60.22" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="65.38" width="2.15" height="3.03" rx="0.52"/><rect x="36.91" y="70.54" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="34.44" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="39.59" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="44.75" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="49.91" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="55.06" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="60.22" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="65.38" width="2.15" height="3.03" rx="0.52"/><rect x="68.94" y="70.54" width="2.15" height="3.03" rx="0.52"/></g>
+        <rect x="35.0" y="30.5" width="38.0" height="47.0" fill="url(#sheen)"/>
+      </g>
+      <rect x="35.3" y="30.8" width="37.4" height="46.4" rx="1.3" fill="none"
+            stroke="#FFE3AC" stroke-width="0.55" opacity="0.32"/>
+      <path d="M72.7 32.1v18" fill="none" stroke="#FFF0C8" stroke-width="0.9" stroke-linecap="round" opacity="0.75"/>
+      <path d="M37.3 30.8h33" fill="none" stroke="#FFE3AC" stroke-width="0.7" stroke-linecap="round" opacity="0.5"/>
+      <rect x="40.97" y="34.30" width="26.06" height="39.40" rx="0.8" fill="none"
+            stroke="#0A0908" stroke-width="0.45" opacity="0.65"/>
+    </g>
+  </g>
+
+  <!-- Themed icons get this and nothing else: the film piece as one silhouette, with the
+       perforations and the frame window punched clean through, and the leak as a solid
+       wedge in the corner it comes from. -->
+  <g id="mono">
+    <path fill="#000" fill-rule="evenodd"
+      d="M36.5 30.5h35.0a1.5 1.5 0 0 1 1.5 1.5v44.0a1.5 1.5 0 0 1-1.5 1.5h-35.0a1.5 1.5 0 0 1-1.5-1.5v-44.0a1.5 1.5 0 0 1 1.5-1.5z
+         M40.97 34.30H67.03V73.70H40.97Z
+         M37.43 34.44h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM37.43 39.59h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM37.43 44.75h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM37.43 49.91h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM37.43 55.06h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM37.43 60.22h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM37.43 65.38h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM37.43 70.54h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 34.44h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 39.59h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 44.75h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 49.91h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 55.06h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 60.22h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 65.38h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52zM69.46 70.54h1.11a0.52 0.52 0 0 1 0.52 0.52v1.99a0.52 0.52 0 0 1 -0.52 0.52h-1.11a0.52 0.52 0 0 1 -0.52 -0.52v-1.99a0.52 0.52 0 0 1 0.52 -0.52z"/>
+    <path fill="#000" d="M67.03 34.30L67.03 52.30L47.03 34.30Z"/>
+  </g>
+</svg>

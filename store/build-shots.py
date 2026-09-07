@@ -99,16 +99,16 @@ SEED_IMAGES = r"""
 WAIT = "const w = ms => new Promise(r => setTimeout(r, ms));"
 
 spec = {
-    "url": "http://127.0.0.1:8917/index.html",
+    "url": "http://127.0.0.1:8820/index.html",
     "out": os.path.join(os.path.dirname(HERE), "store", "screenshots"),
-    "width": 540, "height": 960, "dpr": 2, "wait": 1400,
+    "width": 540, "height": 960, "dpr": 2, "wait": 1600,
     "colorScheme": "dark",
     "seed": SCENES + STATE,
     "shots": [
         {"name": "01-camera", "waitMs": 1200, "before": SEED_IMAGES},
         {"name": "02-sheet", "waitMs": 1100, "before":
-         "(async()=>{" + WAIT + " App.show('sheets'); await w(700);"
-         " document.querySelectorAll('.rollcard')[1].click(); await w(900);})()"},
+         "(async()=>{" + WAIT + " App.show('sheets'); await w(900);"
+         " document.querySelectorAll('.rollcard')[1].click(); await w(1100);})()"},
         {"name": "03-loupe", "waitMs": 900, "before":
          "(async()=>{" + WAIT + " const g=document.querySelector('#shGrid');"
          " const c=g.querySelectorAll('.cell')[15]; const r=c.querySelector('img').getBoundingClientRect();"
@@ -123,9 +123,9 @@ spec = {
            " await w(200); await App.openFrame(19); await w(800);})()"},
         {"name": "05-stocks", "waitMs": 900, "before":
          "(async()=>{" + WAIT + " App.show('stocks'); await w(600);})()"},
-        {"name": "06-lab", "waitMs": 900, "before":
-         "(async()=>{" + WAIT + " App.show('sheets'); await w(800);"
-         " document.querySelector('#sheetsList').scrollIntoView();})()"}
+        {"name": "06-archive", "waitMs": 1400, "before":
+         "(async()=>{" + WAIT + " App.show('sheets'); await w(900);"
+         " const s=document.querySelector('#v-sheets .scroller'); if(s) s.scrollTop=0;})()"}
     ]
 }
 

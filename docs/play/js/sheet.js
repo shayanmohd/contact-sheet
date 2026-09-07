@@ -30,7 +30,7 @@ const Sheet = (() => {
     const out = [];
     for (let i = 0; i < (count || 6); i++) {
       const f = roll.frames[i];
-      out.push(f ? (await DB.url(DB.thmKey(roll.id, f.n))) || '' : '');
+      out.push(f ? (await DB.url(DB.thmKey(roll.id, f.n))) || '' : '');   // '' means clear film
     }
     return out;
   }
@@ -43,11 +43,15 @@ const Sheet = (() => {
       const cell = document.createElement('div');
       cell.className = 'cell' + (f && f.keeper ? ' keeper' : '');
       cell.dataset.n = i;
+      cell.style.setProperty('--row', String(Math.ceil(i / 6) - 1));
       const url = f ? await DB.url(DB.thmKey(roll.id, i)) : null;
+      // A frame that was never shot is clear film, and clear film prints black. Never a
+      // broken picture: a 12 exposure roll used to show 24 broken image icons.
       cell.innerHTML =
-        `<img class="im" alt="Frame ${i}"${url ? ` src="${url}"` : ''}>` +
+        (url ? `<img class="im" alt="Frame ${i}" src="${url}">` : `<div class="im blank"></div>`) +
         (f && f.keeper ? pencilSvg(i) : '') +
         `<div class="reb"><span class="spro"></span><span class="no">${i}</span></div>`;
+      if (!f) cell.classList.add('unshot');
       el.appendChild(cell);
     }
   }
@@ -119,10 +123,18 @@ const Sheet = (() => {
       try { ctx.drawImage(src, sx, sy, sw, sw, 0, 0, D, D); } catch (e) {}
     }
 
+    /* The loupe is fixed, so the shell's insets do not move it: clamp it out from under
+       the status bar and the navigation bar by hand. */
+    const inset = name => {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name);
+      const n = parseFloat(v);
+      return isNaN(n) ? 0 : n;
+    };
     function place(x, y) {
       const w = loupe.offsetWidth || 156;
+      const sat = inset('--sat'), sab = inset('--sab');
       const left = Math.max(6, Math.min(window.innerWidth - w - 6, x - w / 2));
-      const top = Math.max(6, Math.min(window.innerHeight - w - 6, y - w - 26));
+      const top = Math.max(sat + 6, Math.min(window.innerHeight - sab - w - 6, y - w - 26));
       loupe.style.left = left + 'px';
       loupe.style.top = top + 'px';
     }
